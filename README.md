@@ -214,7 +214,7 @@ ping 192.168.1.4
 
 8. validar desconexión
 * Probar ping desde ntt-vm
-``` Azure CLI
+```Azure CLI
 azureuser@dmz-vm:~$ ping 192.168.1.4
 ```
 * Agregar regla a NSG que permite tráfico entrante desde 10.0.1.0/24
