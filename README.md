@@ -272,21 +272,25 @@ Para permitir el tráfico transitivo a través del NVA, debemos permitir IP forw
 
 1. Ejecutamos el siguiente comando para habilitar IP forwarding en la NIC de `nva-001-vm`
 ```
-az network nic update --name nva-001-VMNic -g networking-training-rg --ip-forwarding true
+az network nic update --name nva-001-vmVMNic -g networking-training-rg --ip-forwarding true
 ```
 > Nota: Es posible que el nombre entregado en el parámetro `--name` sea diferente, dependiendo del nombre utilizado para crear la VM. La manera más sencilla de validar el nombre de la NIC, es revisando en el listado del grupo de recursos:
 > ![image](https://user-images.githubusercontent.com/17756717/178077823-1177382c-489f-4355-9d61-e9fe507a5b92.png) 
 
-------------------------------------------------
+2. Luego nos conectamos a la `nva-001-vm` y habilitamos ipforwarding dentro de ella:
+```
+ssh azureuser@$nvaip
 
-2. habilitamos ipforwarding dentro de la dmz-vm
+azureuser@nva-001-vm:~$ sudo vim /etc/sysctl.conf
 ```
-sudo vim /etc/sysctl.conf
+
+3. Descomentamos la línea que dice `net.ipv4.ipforward=1`, cerramos Vim (`ESC` + `:wq!` + `ENTER`) y luego ejecutamos el siguiente comando para persistir los cambios:
 ```
-* descomentar net.ipv4.ipforward=1 y luego ejecutar el siguiente comando para actualizar:
+azureuser@nva-001-vm:~$ sudo sysctl -p
 ```
-sudo sysctl -p
-```
+
+## Paso 10: Configuración de tabla de ruta en `it-norte-subnet` para utilización de NVA
+
 * ir a ntt-vnet > public-subnet, validar que no hay tabla asociada
 * buscar route y seleccionar route tables
 * click en Create
