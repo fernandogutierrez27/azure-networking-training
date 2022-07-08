@@ -174,9 +174,10 @@ A continuación, validaremos que no tenemos acceso entre las diferentes redes.
 az vm list-ip-addresses --resource-group networking-training-rg --query '[].virtualMachine.network.publicIpAddresses'
 ```
 
-2. Para guardar la IP xxx.xxx.xxx.xxx en la variable `norteip`, ejecutamos:
+2. Para guardar la IP xxx.xxx.xxx.xxx en la variable `norteip` y luego la IP yyy.yyy.yyy.yyy en la variable `nvaip`, ejecutamos:
 ```
 norteip=xxx.xxx.xxx.xxx
+nvaip=yyy.yyy.yyy.yyynvai
 ```
 
 3. Accedemos a la VM `of-norte-001-vm`
@@ -205,6 +206,7 @@ A continuación, genaremos el peering entre oficina norte y el hub a través del
 ![image](https://user-images.githubusercontent.com/17756717/178075890-1389597c-7163-47c9-9af8-3e4c4a567f87.png)
 
 3. A continuación, presionamos en el botón `Add`:
+
 ![image](https://user-images.githubusercontent.com/17756717/178075929-06eb0651-020c-45a9-bbdf-140564b5a094.png)
 
 4. Bajo la sección de This virtual network, en Peering link name ingresamos como nombre `oficina-norte-vnet-to-hub-vnet`, luego, en la sección Remote virtual network ingresamos como Peering link name el valor `hub-vnet-to-oficina-norte-vnet`.
@@ -228,39 +230,56 @@ A continuación, genaremos el peering entre oficina norte y el hub a través del
 azureuser@of-norte-001-vm:~$ ping 172.16.1.4 -c 4 -W 1
 ```
 
-- Generar peering para dmz-cliente
-* En Azure CLI ingresar
+## Paso 8: Generación de Vnet Peering entre `oficina-sur-vnet` y `hub-vnet`
+A continuación, generaremos el Peering para las redes faltantes a través de Azure CLI.
+
+1. Generamos Peering `hub-vnet-to-oficina-sur-vnet`
 ```
 az network vnet peering create \
-    --name dmz-vnet-to-cliente-vnet \
-    --remote-vnet cliente-vnet \
+    --name hub-vnet-to-oficina-sur-vnet \
+    --remote-vnet oficina-sur-vnet \
     --resource-group networking-training-rg \
-    --vnet-name dmz-vnet \
-    --allow-vnet-access \
-    --allow-forwarded-traffic
-```
-* Luego, realizar la conexión inversa
-```
-az network vnet peering create \
-    --name cliente-vnet-to-dmz-vnet \
-    --remote-vnet dmz-vnet \
-    --resource-group networking-training-rg \
-    --vnet-name cliente-vnet \
+    --vnet-name hub-vnet \
     --allow-vnet-access \
     --allow-forwarded-traffic
 ```
 
-4. comprobar conectividad entre 1 y 2, 3 y 2, pero no entre 1 y 3
-* Probar conexión desde DMZ a ambos destinos
-* Luego probar conexión desde ntt-vm a cliente-vm --> Fallo
-
-5. habilitar tráfico en nva (DMZ)
-* actualizamos la nic para habilitar IP forwarding en la NIC de la dmz-vim
+2. Luego realizamos la conexión en el sentido contrario:
 ```
-az network nic update --name dmz-vmVMNic -g networking-training-rg --ip-forwarding true
+az network vnet peering create \
+    --name oficina-sur-vnet-to-hub-vnet \
+    --remote-vnet hub-vnet \
+    --resource-group networking-training-rg \
+    --vnet-name oficina-sur-vnet \
+    --allow-vnet-access \
+    --allow-forwarded-traffic
 ```
 
-* habilitamos ipforwarding dentro de la dmz-vm
+3. A continuación, comprobamos que al ingresar a `nva-001-vm`, es posible llegar a `of-norte-001-vm` y `of-sur-001-vm`
+```
+ssh azureuser@$nvaip
+
+azureuser@nva-001-vm:~$ ping 10.0.1.4 -c 4 -W 1
+azureuser@nva-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
+```
+
+4. No obstante, si ingresamos mediante ssh a `of-norte-001-vm` y realizamos un ping hace `of-sur-001-vm`, el comando va a fallar. Es decir, la conexión de Peering no es transitiva!!
+
+# Continuará...
+
+## Paso 9: Habilitación de tráfico transitivo en hub
+Para permitir el tráfico transitivo a través del NVA, debemos permitir IP forwarding tanto en la NIC de la VM (en Azure), como dentro del sistema operativo (Ubuntu)
+
+1. Ejecutamos el siguiente comando para habilitar IP forwarding en la NIC de `nva-001-vm`
+```
+az network nic update --name nva-001-VMNic -g networking-training-rg --ip-forwarding true
+```
+> Nota: Es posible que el nombre entregado en el parámetro `--name` sea diferente, dependiendo del nombre utilizado para crear la VM. La manera más sencilla de validar el nombre de la NIC, es revisando en el listado del grupo de recursos:
+> ![image](https://user-images.githubusercontent.com/17756717/178077823-1177382c-489f-4355-9d61-e9fe507a5b92.png) 
+
+------------------------------------------------
+
+2. habilitamos ipforwarding dentro de la dmz-vm
 ```
 sudo vim /etc/sysctl.conf
 ```
