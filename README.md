@@ -138,7 +138,7 @@ az vm create \
     --no-wait
 ```
 
-* Luego la VM con el rol de NVA para la vnet Hub:
+4. Luego la VM con el rol de NVA para la vnet Hub:
 ```
 az vm create \
     --resource-group networking-training-rg \
@@ -153,7 +153,7 @@ az vm create \
     --no-wait
 ```
 
-* Finalmente, la VM en la red de la oficina sur:
+5. Finalmente, la VM en la red de la oficina sur:
 ```
 az vm create \
     --resource-group networking-training-rg \
@@ -189,21 +189,44 @@ ssh azureuser@$norteip
 azureuser@of-norte-001-vm:~$ ping 172.16.1.4 -c 4 -W 1
 azureuser@of-norte-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
 ```
-> Nota: Para diferencias los comandos ejecutados desde una VM a los ejecutados desde la Azure Cloud Shell, agregaremos el nombre de la VM en caso de aplicar. Para poder ejecutar el comando anterior con éxito, no se debe copiar la parte que dice `azureuser@of-norte-001-vm:~$`, esto es solo para referenciar el origen del comando.
+> Nota: Para diferencias los comandos ejecutados desde una VM a los ejecutados desde la Azure Cloud Shell, hemos agregado el nombre de la VM al comando. Para poder ejecutar el comando anterior con éxito, no se debe copiar la parte que dice `azureuser@of-norte-001-vm:~$`, esto es solo para referenciar el origen del comando.
 
 5. Ambos ping deberían fallar.
 
-3. generar peering entre 1-2, 2-3
-- usar portal
-* Ir a ntt-vnet
-* Seleccionar peerings en menú a la izquierda)
-* Seleccionar Add
-* Ingresar nombre `ntt-vnet-to-dmz-vnet`
-* Ingresar nombre remoto `dmz-vnet-to-ntt-vnet`
-* seleccionar dmz-vnet como vnet remota
-* Validar estado en ambas vnets
+## Paso 7: Generación de peering entre `of-norte-vnet` y `hub-vnet` a través del portal
+A continuación, genaremos el peering entre oficina norte y el hub a través del portal de Azure.
 
-* Validar ping
+1. Ingresamos a `oficina-norte-vnets` desde el listado de recursos:
+
+![image](https://user-images.githubusercontent.com/17756717/178075786-fee703ec-fabc-4344-bf1d-1e9b63541ddc.png)
+
+2. Seleccionamos `Peerings` (bajo la sección Settings) en menú lateral izquierdo:
+
+![image](https://user-images.githubusercontent.com/17756717/178075890-1389597c-7163-47c9-9af8-3e4c4a567f87.png)
+
+3. A continuación, presionamos en el botón `Add`:
+![image](https://user-images.githubusercontent.com/17756717/178075929-06eb0651-020c-45a9-bbdf-140564b5a094.png)
+
+4. Bajo la sección de This virtual network, en Peering link name ingresamos como nombre `oficina-norte-vnet-to-hub-vnet`, luego, en la sección Remote virtual network ingresamos como Peering link name el valor `hub-vnet-to-oficina-norte-vnet`.
+
+![image](https://user-images.githubusercontent.com/17756717/178076198-1856b98f-7767-40ee-9c75-81950d2596c7.png)
+
+5. Seleccionamos `hub-vnet` en el selector de Virtual network de la sección Remote virtual network. Finalmente, mantenemos todos los valores predeterminados y presionamos sobre el botón `Add`:
+
+![image](https://user-images.githubusercontent.com/17756717/178076368-51cfe71a-1139-499f-b155-bdb430d0f02f.png)
+
+6. A continuación, deberíamos poder ver el nuevo Peering, con el estado Connected. Si el estado es Updating, por favor espere unos minutos y vuelva a recargar la vista.
+
+![image](https://user-images.githubusercontent.com/17756717/178076472-73fc97e1-71c5-46e5-a23e-6ae7582ca58b.png)
+
+7. Además, si revisamos la sección Peering de la `hub-vnet`, encontraremos que una nueva conexión de Peering se ha creado automáticamente:
+
+![image](https://user-images.githubusercontent.com/17756717/178076576-2a691af4-990d-4d9b-97c4-e52c034b6c3c.png)
+
+8. Finalmente realizamos una prueba de ping desde `of-norte-001-vm` hacia `nva-001-vm`, la cual debería ser exitosa. Con esto validamos que la reciente conexión de Peering ha funcionado correctamente.
+```
+azureuser@of-norte-001-vm:~$ ping 172.16.1.4 -c 4 -W 1
+```
 
 - Generar peering para dmz-cliente
 * En Azure CLI ingresar
