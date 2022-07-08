@@ -39,9 +39,9 @@ Para comenzar, vamos a crear un grupo de recursos donde desplegaremos cada uno d
 
 ![image](https://user-images.githubusercontent.com/17756717/178070449-c511fbd5-0307-415a-ae4a-639c30b5bbef.png)
 
-5. Seleccione el grupo de recursos creado con anterioridad y la región a desplegar la Virtual Network (`East US 2`). Finalmente agregue como nombre de la Vnet `ntt-vnet` y presione `Next: IP Addresses`.
+5. Seleccione el grupo de recursos creado con anterioridad y la región a desplegar la Virtual Network (`East US 2`). Finalmente agregue como nombre de la Vnet `oficina-norte-vnet` y presione `Next: IP Addresses`.
 
-![image](https://user-images.githubusercontent.com/17756717/178070702-f51861f3-757c-4d39-a19a-a0930b61ce21.png)
+![image](https://user-images.githubusercontent.com/17756717/178073503-1ac19588-7bab-4c7b-bb7a-2ded60f1c788.png)
 
 6. En la siguiente pantalla, elimine el `IPv4 address space` predeterminado.
 
@@ -49,50 +49,73 @@ Para comenzar, vamos a crear un grupo de recursos donde desplegaremos cada uno d
 
 8. Presione sobre el botón `Add subnet`
 
-9. Ingrese `ntt-subnet` como nombre de la Subnet y el siguiente Subnet address range `10.0.1.0/24`. Finalmente presione el botón Add.
+9. Ingrese `it-norte-subnet` como nombre de la Subnet y el siguiente Subnet address range `10.0.1.0/24`. Finalmente presione el botón Add.
 
-![image](https://user-images.githubusercontent.com/17756717/178071045-d11f4095-9b0a-4e5a-8b26-c37e77bed5c9.png)
+![image](https://user-images.githubusercontent.com/17756717/178073715-c020f7a3-7c3e-43e9-bfd5-1313a0d2df8f.png)
 
 10. Presione en `Review + create`y finalmente en `Create`.
 
-![image](https://user-images.githubusercontent.com/17756717/178071207-bcb7a831-c49b-45c6-9ff2-f109df5e4748.png)
+![image](https://user-images.githubusercontent.com/17756717/178073853-192ad9be-521e-48e0-a4ac-390e7de1a191.png)
 
-A continuación, crearemos 2 vnets adicionales, `dmz-vnet` y `cliente-vnet`, además, para cada uno crearemos una subnet, `dmz-subnet` y `ntt-subnet` respectivamente.
-### Habilitación de Azure CLI
-* Haga click en el ícono de consola ubicado arriba a la derecha, esto iniciará una Azure Cloud CLI.
-* Seleccione Bash como lenguage y luego presione en el botón `Create storage`
-* Presione en show advanced settings
-* En Resource group, seleccione Use existing y luego seleccione el grupo de recursos creado para el tutorial.
-* En Storage Account, seleccione create new e ingrese un nombre cuenta de Storage Account, Azure validará que este nombre sea único y solo contenga números y letras.
-* En File share, seleccione Create new e ingrese un nombre de File share
-* Ejecute el siguiente comando para generar la vnet y subnet de DMZ:
+## Paso 3: Habilitación de Azure CLI
+Procederemos a habilitar la Azure Cloud Shell. Esta herramienta corresponde a una interfaz de línea de comandos que viene incorporada en el portal de Azure, la cual nos permitirá ejecutar diferentes comandos de Azure CLI.
+
+1. Haga click en el ícono de consola ubicado arriba a la derecha, esto iniciará una Azure Cloud Shell.
+
+![image](https://user-images.githubusercontent.com/17756717/178071763-d9c9df1a-5ef7-440b-82a9-631c2f565ab2.png)
+
+2. Seleccione `Bash` como lenguage y luego presione en `Show advanced settings`.
+
+3. Seleccione la región elegida con anterioridad (East US 2) o alguna de su preferencia.
+
+4. En Resource group, seleccione `Use existing` y luego seleccione el grupo de recursos creado para el tutorial (networking-training-rg).
+
+5. En Storage Account, seleccione `Create new` e ingrese un nombre cuenta de Storage Account, Azure validará que este nombre sea único y solo contenga números y letras.
+
+6. En File share, seleccione `Create new` e ingrese un nombre de File share (ej: `azcli`).
+
+7. Finalmente presione el botón `Create Storage`. Azure Cloud Shell hace uso de un recurso de File share dentro de un Storage account, para simular el sistema de archivos. Como resultado, ahora podrá empezar a escribir comando en Azure Cloud Shell.
+
+![image](https://user-images.githubusercontent.com/17756717/178072276-2f905943-1021-4b60-8da0-6d560a85bb15.png)
+
+
+## Paso 4: Creación de Vnets adicionales
+A continuación, crearemos 2 Vnets adicionales llamadas `hub-vnet` y `oficina-sur-vnet`, además crearemos una Subnet para cada una de las Vnets, las cuales se llamarán `dmz-subnet` y `it-sur-subnet` respectivamente.
+
+1. Ejecute el siguiente comando para generar la Vnet y Subnet de `hub`:
 ```
 az network vnet create \
     --resource-group networking-training-rg \
-    --name dmz-vnet \
+    --name hub-vnet \
     --address-prefixes 172.16.0.0/12 \
     --subnet-name dmz-subnet \
     --subnet-prefixes 172.16.1.0/24 \
     --location eastus2
 ```
-* Ejecute el siguiente comando para generar la vnet y subnet de cliente:
+
+2. Ejecute el siguiente comando para generar la Vnet y Subnet de `oficina-sur`:
 ```
 az network vnet create \
     --resource-group networking-training-rg \
-    --name cliente-vnet \
+    --name oficina-sur-vnet \
     --address-prefixes 192.168.0.0/16 \
-    --subnet-name ntt-subnet \
+    --subnet-name it-sur-subnet \
     --subnet-prefixes 192.168.1.0/24 \
     --location eastus2
 ```
+3. Debería visualizarse los siguientes recursos en el resource gruop:
 
-2. Crear 3 VMs (una en cada vnet con su respectivo bastion)
-* Open the Cloud Shell editor and create a file named cloud-init.txt.
+![image](https://user-images.githubusercontent.com/17756717/178074114-2eb7c61b-331e-455c-bc33-4c3e81290d32.png)
+
+## Paso 5: Creación de Virtual Machines
+A continuación, vamos a crear una VM en cada una de las Vnets, para poder realizar pruebas de conectividad.
+
+1. En primer lugar, vamos a crear un archivo llamado cloud-init.txt, este archivo nos permitirá precargar algunas herramientas en nuestras VMs.
 ```
 code cloud-init.txt
 ```
 
-* agregar siguiente information al archivo. con esta configuración inetutils-traceroute es instalado, lo cual contiene la utilidad de traceroute
+2. Agregar siguiente information al archivo. Con esta configuración `inetutils-traceroute` es instalado, lo cual contiene la utilidad de `traceroute`. Finalmente, presione `CTRL + S` para guardar y luego `CTRL + Q` para salir. 
 ```
 #cloud-config
 package_upgrade: true
@@ -100,60 +123,75 @@ packages:
    - inetutils-traceroute
 ```
 
-* Generar la VM para la red ntt
+3. Generamos la primera VM para la red de la oficina norte:
 ```
 az vm create \
     --resource-group networking-training-rg \
-    --name ntt-vm \
-    --vnet-name ntt-vnet \
-    --subnet public-subnet \
+    --name of-norte-001-vm \
+    --vnet-name oficina-norte-vnet \
+    --subnet it-norte-subnet \
     --image UbuntuLTS \
     --admin-username azureuser \
     --size Standard_B1s \
     --generate-ssh-keys \
-    --custom-data cloud-init.txt
+    --custom-data cloud-init.txt \
+    --no-wait
 ```
 
-* Luego la VM con el rol de NVA para la DMZ
+* Luego la VM con el rol de NVA para la vnet Hub:
 ```
 az vm create \
     --resource-group networking-training-rg \
-    --name dmz-vm \
-    --vnet-name dmz-vnet \
+    --name nva-001-vm \
+    --vnet-name hub-vnet \
     --subnet dmz-subnet \
     --image UbuntuLTS \
     --admin-username azureuser \
     --size Standard_B1s \
     --generate-ssh-keys \
-    --custom-data cloud-init.txt
+    --custom-data cloud-init.txt \
+    --no-wait
 ```
 
-* Finalmente, la VM en la red del cliente
+* Finalmente, la VM en la red de la oficina sur:
 ```
 az vm create \
     --resource-group networking-training-rg \
-    --name cliente-vm \
-    --vnet-name cliente-vnet \
-    --subnet ntt-subnet \
+    --name of-sur-001-vm \
+    --vnet-name oficina-sur-vnet \
+    --subnet it-sur-subnet \
     --image UbuntuLTS \
     --admin-username azureuser \
     --size Standard_B1s \
     --generate-ssh-keys \
     --custom-data cloud-init.txt
 ```
+## Paso 6: Comprobación de acceso inicial
+A continuación, validaremos que no tenemos acceso entre las diferentes redes.
 
-* Acceder a vm NTT
+1. Tomamos nota de cada una de las IPs públicas generadas para cada VM. En nuestro caso, almacenaremos el valor de la IP pública de `of-norte-001-vm` en la variable `$norteip` y de `nva-001-vm` en la variable `$nvaip`. Para listar las IPs públicas generadas, se debe utilizar el siguiente comando:
 ```
-# suggested IP: 10.0.1.4
-ssh azureuser@<ntt-vm-public-ip>
-```
-
-* realizar ping a DMZ y cliente
-```
-ping <dmz-vm-private-ip> -c 4 -W 1 # suggested IP 172.16.1.4
-ping <cliente-vm-private-ip> -c 4 -W 1 #suggested IP 192.168.1.4
+az vm list-ip-addresses --resource-group networking-training-rg --query '[].virtualMachine.network.publicIpAddresses'
 ```
 
+2. Para guardar la IP xxx.xxx.xxx.xxx en la variable `norteip`, ejecutamos:
+```
+norteip=xxx.xxx.xxx.xxx
+```
+
+3. Accedemos a la VM `of-norte-001-vm`
+```
+ssh azureuser@$norteip
+```
+
+4. Realizamos ping a `nva-001-vm` y `of-sur-001-vm`, cuyas IPs deberían ser `172.16.1.4` y `192.168.1.4` respectivamente.
+```
+azureuser@of-norte-001-vm:~$ ping 172.16.1.4 -c 4 -W 1
+azureuser@of-norte-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
+```
+> Nota: Para diferencias los comandos ejecutados desde una VM a los ejecutados desde la Azure Cloud Shell, agregaremos el nombre de la VM en caso de aplicar. Para poder ejecutar el comando anterior con éxito, no se debe copiar la parte que dice `azureuser@of-norte-001-vm:~$`, esto es solo para referenciar el origen del comando.
+
+5. Ambos ping deberían fallar.
 
 3. generar peering entre 1-2, 2-3
 - usar portal
