@@ -203,11 +203,20 @@ sudo sysctl -p
 
 
 6. probar conectividad entre 1 y 3
+```
+ping 192.168.1.4
+```
 
 7. agregar NSG en 3
+* Crear NSG
+* Asociar a subnet
+* Denegar todo el tráfico desde todos los origenes
 
 8. validar desconexión
-
-9. agregar regla
-
-10. validar conexión
+* Probar ping desde ntt-vm
+``` Azure CLI
+azureuser@dmz-vm:~$ ping 192.168.1.4
+```
+* Agregar regla a NSG que permite tráfico entrante desde 10.0.1.0/24
+* Probar ping desde ntt-vm
+* Probar ping desde dmz-vm
