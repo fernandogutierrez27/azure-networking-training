@@ -265,8 +265,6 @@ azureuser@nva-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
 
 4. No obstante, si ingresamos mediante ssh a `of-norte-001-vm` y realizamos un ping hace `of-sur-001-vm`, el comando va a fallar. Es decir, la conexión de Peering no es transitiva!!
 
-# Continuará...
-
 ## Paso 9: Habilitación de tráfico transitivo en hub
 Para permitir el tráfico transitivo a través del NVA, debemos permitir IP forwarding tanto en la NIC de la VM (en Azure), como dentro del sistema operativo (Ubuntu)
 
@@ -290,46 +288,63 @@ azureuser@nva-001-vm:~$ sudo sysctl -p
 ```
 
 ## Paso 10: Configuración de tabla de ruta en `it-norte-subnet` para utilización de NVA
+Es esta sección, vamos a configurar una User Defined Route para `it-norte-subnet`, que enrutará todo el tráfico destinado a `192.168.1.0/24` hacia nuestro `nva-001-vm`.
 
-* ir a ntt-vnet > public-subnet, validar que no hay tabla asociada
-* buscar route y seleccionar route tables
-* click en Create
-* completar resource group, region y nombre (ntt-udr)
-* click en Review + create y luego en Create
-* ir al recurso
+1. Ingresamos a `oficina-norte-vnet`, luego vamos a la sección de Subnets y seleccionamos `it-norte-subnet`. Finalmente, validamos que no existe ninguna Route table seleccionada.
 
-* ir a Routes y luego dar click en Add
-* agregar nombre: cliente-route
-* seleccionar address prefix destination: IP addresses
-* ingresar prefijo de red: ntt-subnet (en cliente-vnet) 192.168.1.0/24
-* seleccionar Next hop type: virtual appliance
-* ingresar Next hop address: dmz-vm internal ip (172.16.1.4)
+![image](https://user-images.githubusercontent.com/17756717/178081768-cbf003f1-4806-4829-98a3-5261a2d22e97.png)
 
-* Ir a la sección subnets y hacer click en associate
-* seleccionar ntt-vnet
-* Seleccionar ntt-subnet
-* la UDR se ha asociado a dmz-subnet
+2. Posteriormente, escribímos `route` en la barra de búsqueda superior y seleccioanmos Route tables.
 
-* Ingresar a subnet y validar route table
+![image](https://user-images.githubusercontent.com/17756717/178081826-6fba1ded-2bd1-449c-b0f6-d68505a4cd8e.png)
 
+3. Pulsamos en el botón `Create`.
 
+4. Seleccionamos nuestro grupo de recursos (`network-training-rg`), la región en la que estamos trabajando (`East US 2`) y agregamos como nombre `it-norte-udr`. Finalmente presionamos el botón `Review + create` y en la página siguiente presionamos en `Create`.
 
-6. probar conectividad entre 1 y 3
+![image](https://user-images.githubusercontent.com/17756717/178081942-2c004c2e-684c-4ec1-8de3-25d070c957b2.png)
+
+5. Una vez creado el recurso, accedemos a éste. Luego vamos a la sección `Routes` del menú de la izquierda y presionamos sobre el botón `Add`:
+
+![image](https://user-images.githubusercontent.com/17756717/178082036-c25e3c70-acff-4439-a961-98b25ab6e099.png)
+
+7. Agregamos la siguiente configuración y luego presionamos en el botón `Add`:
+* Route name: `it-sur-subnet-to-nva`
+* Address prefix destination: `IP Addresses`
+* Destination IP addresses/CIDR ranges: `192.168.1.0/24`
+* Next hop type: `Virtual appliance`
+* Next hop address: `172.16.1.4`
+
+![image](https://user-images.githubusercontent.com/17756717/178082182-6c36c347-785f-496f-be66-f2801d3ea3e8.png)
+
+8. Posteriormente, vamos a la sección subnets y hacemos click en `Associate`. Luego seleccionamos la Virtual network `oficina-norte-vnet` y la subnet `it-norte-subnet`. Finalmente, presionamos el botón `OK`.
+
+![image](https://user-images.githubusercontent.com/17756717/178082291-7a5e7d46-5d7a-458f-ad81-7ca160175b64.png)
+
+9. Volvemos a ingresar a la Subnet (`it-norte-subnet`) y veremos que ahora tenemos asociada la Route table `it-norte-udr`:
+
+![image](https://user-images.githubusercontent.com/17756717/178082351-ea6df19b-7230-4909-86af-376f2570d013.png)
+
+10. Finalmente, es necesario repetir los pasos anteriores, para crear una User defined route para la subnet `it-sur-subnet`, tomando en cuenta la siguiente configuración:
+* Nombre de Route table: `it-sur-udr`.
+* Ruta a agregar:
+  * Route name: `it-norte-subnet-to-nva`
+  * Address prefix destination: `IP Addresses`
+  * Destination IP addresses/CIDR ranges: `10.0.1.4/24`
+  * Next hop type: `Virtual appliance`
+  * Next hop address: `172.16.1.4`
+
+## Paso 11: Ping final
+Finalmente, ingresamos a `of-norte-001-vm` y ejecutamos un ping hacia `192.168.1.4`
 ```
-ping 192.168.1.4
+azureuser@of-norte-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
 ```
+Si el ping ha funcionado correctamente, **Felicitaciones!!**
 
-7. agregar NSG en 3
-* Crear NSG
-* Asociar a subnet
-* Denegar todo el tráfico desde todos los origenes
-
-8. validar desconexión
-* Probar ping desde ntt-vm
-```Azure CLI
-azureuser@dmz-vm:~$ ping 192.168.1.4
-```
-* Agregar regla a NSG que permite tráfico entrante desde 10.0.1.0/24
-* Probar ping desde ntt-vm
-* Probar ping desde dmz-vm
-
+## Bonus track: NSG
+Tarea:
+* Crear un NSG y asociarlo a la Subnet `dmz-subnet`.
+* Denegar todo el tráfico entrando que se dirija a `it-sur-subnet`.
+* Probar ping desde `of-norte-001-vm` hacia `of-sur-001-vm`: Debe fallar.
+* Agregar regla a NSG que permita tráfico desde `it-norte-subnet` hacia `it-sur-subnet`.
+* Probar nuevamente ping, ahora debe funcionar.
