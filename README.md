@@ -23,7 +23,7 @@ Para comenzar, vamos a crear un grupo de recursos donde desplegaremos cada uno d
 
 ![image](https://user-images.githubusercontent.com/17756717/178022127-44ba672b-eb19-45e9-8ab8-4410838b041b.png)
 
-3. Ingrese `azure-network-training-rg` como nombre del RG, seleccione la región `East US 2` y presione en `Review + create`.
+3. Ingrese `networking-training-rg` como nombre del RG, seleccione la región `East US 2` y presione en `Review + create`.
 
 ![image](https://user-images.githubusercontent.com/17756717/178022277-7df44bb5-77e1-4e7c-873e-655cf719063a.png)
 
@@ -44,9 +44,9 @@ Para comenzar, vamos a crear un grupo de recursos donde desplegaremos cada uno d
 
 ![image](https://user-images.githubusercontent.com/17756717/178070449-c511fbd5-0307-415a-ae4a-639c30b5bbef.png)
 
-5. Seleccione el grupo de recursos creado con anterioridad y la región a desplegar la Virtual Network (`East US 2`). Finalmente agregue como nombre de la Vnet `oficina-norte-vnet` y presione `Next: IP Addresses`.
+5. Seleccione el grupo de recursos creado con anterioridad y la región a desplegar la Virtual Network (`West US 2`). Finalmente agregue como nombre de la Vnet `oficina-norte-vnet` y presione `Next: IP Addresses`.
 
-![image](https://user-images.githubusercontent.com/17756717/178073503-1ac19588-7bab-4c7b-bb7a-2ded60f1c788.png)
+![image](https://user-images.githubusercontent.com/17756717/178283366-09bc2929-6c4a-4084-be75-b6722f3c213e.png)
 
 6. En la siguiente pantalla, elimine el `IPv4 address space` predeterminado.
 
@@ -71,7 +71,7 @@ Procederemos a habilitar la Azure Cloud Shell. Esta herramienta corresponde a un
 
 2. Seleccione `Bash` como lenguage y luego presione en `Show advanced settings`.
 
-3. Seleccione la región elegida con anterioridad (East US 2) o alguna de su preferencia.
+3. Seleccione la región `East US 2` o alguna de su preferencia.
 
 4. En Resource group, seleccione `Use existing` y luego seleccione el grupo de recursos creado para el tutorial (networking-training-rg).
 
@@ -82,7 +82,6 @@ Procederemos a habilitar la Azure Cloud Shell. Esta herramienta corresponde a un
 7. Finalmente presione el botón `Create Storage`. Azure Cloud Shell hace uso de un recurso de File share dentro de un Storage account, para simular el sistema de archivos. Como resultado, ahora podrá empezar a escribir comando en Azure Cloud Shell.
 
 ![image](https://user-images.githubusercontent.com/17756717/178072276-2f905943-1021-4b60-8da0-6d560a85bb15.png)
-
 
 ## Paso 4: Creación de Vnets adicionales
 A continuación, crearemos 2 Vnets adicionales llamadas `hub-vnet` y `oficina-sur-vnet`, además crearemos una Subnet para cada una de las Vnets, las cuales se llamarán `dmz-subnet` y `it-sur-subnet` respectivamente.
@@ -106,7 +105,7 @@ az network vnet create \
     --address-prefixes 192.168.0.0/16 \
     --subnet-name it-sur-subnet \
     --subnet-prefixes 192.168.1.0/24 \
-    --location eastus2
+    --location brazilsouth
 ```
 3. Debería visualizarse los siguientes recursos en el resource gruop:
 
@@ -133,6 +132,7 @@ packages:
 az vm create \
     --resource-group networking-training-rg \
     --name of-norte-001-vm \
+    --location westus2 \
     --vnet-name oficina-norte-vnet \
     --subnet it-norte-subnet \
     --image UbuntuLTS \
@@ -148,6 +148,7 @@ az vm create \
 az vm create \
     --resource-group networking-training-rg \
     --name nva-001-vm \
+    --location eastus2 \
     --vnet-name hub-vnet \
     --subnet dmz-subnet \
     --image UbuntuLTS \
@@ -163,6 +164,7 @@ az vm create \
 az vm create \
     --resource-group networking-training-rg \
     --name of-sur-001-vm \
+    --location brazilsouth \
     --vnet-name oficina-sur-vnet \
     --subnet it-sur-subnet \
     --image UbuntuLTS \
@@ -202,7 +204,7 @@ azureuser@of-norte-001-vm:~$ ping 192.168.1.4 -c 4 -W 1
 ## Paso 7: Generación de peering entre `of-norte-vnet` y `hub-vnet` a través del portal
 A continuación, genaremos el peering entre oficina norte y el hub a través del portal de Azure.
 
-1. Ingresamos a `oficina-norte-vnets` desde el listado de recursos:
+1. Ingresamos a `oficina-norte-vnet` desde el listado de recursos:
 
 ![image](https://user-images.githubusercontent.com/17756717/178075786-fee703ec-fabc-4344-bf1d-1e9b63541ddc.png)
 
@@ -305,7 +307,7 @@ Es esta sección, vamos a configurar una User Defined Route para `it-norte-subne
 
 3. Pulsamos en el botón `Create`.
 
-4. Seleccionamos nuestro grupo de recursos (`network-training-rg`), la región en la que estamos trabajando (`East US 2`) y agregamos como nombre `it-norte-udr`. Finalmente presionamos el botón `Review + create` y en la página siguiente presionamos en `Create`.
+4. Seleccionamos nuestro grupo de recursos (`network-training-rg`), la región en la que estamos trabajando (`West US 2`) y agregamos como nombre `it-norte-udr`. Finalmente presionamos el botón `Review + create` y en la página siguiente presionamos en `Create`.
 
 ![image](https://user-images.githubusercontent.com/17756717/178081942-2c004c2e-684c-4ec1-8de3-25d070c957b2.png)
 
