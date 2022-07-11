@@ -7,6 +7,7 @@ El siguiente documento tiene por objetivo llevar a cabo algunas pruebas de conce
 4. Implementación de transitividad entre Vnets a través de la implementación de un NVA.
 5. Configuración de Network Security Groups
 
+![image](https://user-images.githubusercontent.com/17756717/178268692-0e7286dd-5f8c-4a1e-8d7d-61df6648dd0d.png)
 
 ## Paso 1: Creación de Grupo de Recursos
 Para comenzar, vamos a crear un grupo de recursos donde desplegaremos cada uno de los componentes de nuestra solución. Siga estos pasos para la creación del RG:
