@@ -309,7 +309,7 @@ Es esta sección, vamos a configurar una User Defined Route para `it-norte-subne
 
 4. Seleccionamos nuestro grupo de recursos (`network-training-rg`), la región en la que estamos trabajando (`West US 2`) y agregamos como nombre `it-norte-udr`. Finalmente presionamos el botón `Review + create` y en la página siguiente presionamos en `Create`.
 
-![image](https://user-images.githubusercontent.com/17756717/178081942-2c004c2e-684c-4ec1-8de3-25d070c957b2.png)
+![image](https://user-images.githubusercontent.com/17756717/178286456-3ee88104-7598-40c1-96eb-2cefa8ca2784.png)
 
 5. Una vez creado el recurso, accedemos a éste. Luego vamos a la sección `Routes` del menú de la izquierda y presionamos sobre el botón `Add`:
 
@@ -334,6 +334,7 @@ Es esta sección, vamos a configurar una User Defined Route para `it-norte-subne
 
 10. Finalmente, es necesario repetir los pasos anteriores, para crear una User defined route para la subnet `it-sur-subnet`, tomando en cuenta la siguiente configuración:
 * Nombre de Route table: `it-sur-udr`.
+* Ubicación: `Brazil South`
 * Ruta a agregar:
   * Route name: `it-norte-subnet-to-nva`
   * Address prefix destination: `IP Addresses`
