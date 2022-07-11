@@ -1,6 +1,10 @@
 # azure-networking-training
 
-El siguiente documento tiene por objetivo llevar a cabo algunas pruebas de concepto relativas a Networking en Azure. Entre los puntos abordados destacan:
+El siguiente documento tiene por objetivo llevar a cabo algunas pruebas de concepto relativas a Networking en Azure. El caso de negocio abarca la unión de 2 oficinas de una empresa global, Oficina Norte (ubicada al norte de Estados Unidos) y Oficina Sur (ubicada en Brasil), las cuales se unen a través de una red Hub (Ubicada al este de Estados Unidos).
+
+![image](https://user-images.githubusercontent.com/17756717/178273251-cf943d95-0990-4581-be51-8b6bfbcc7ccf.png)
+
+Entre los puntos abordados destacan:
 1. Creación de Vnet
 2. Creación de Subnet
 3. Peering
